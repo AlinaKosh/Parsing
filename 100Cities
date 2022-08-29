@@ -13,7 +13,6 @@ public class Pars {
 
     public static void main(String[] args) {
         Pars pars = new Pars();
-        //pars.myFirstPast();
         pars.parsCity();
     }
     private void parsCity() {
