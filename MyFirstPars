@@ -1,0 +1,129 @@
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+
+//КЛАСС В КОТОРМ ВЫПОЛНЯЮТСЯ ОСНОВНЫЕ ДЕЙСТВИЯ, ЧУТЬ НИЖЕ НАХОДИТСЯ ДРУГОЙ КЛАСС ДЛЯ ГЕТТЕРОВ, СЕТТЕРОВ И TOSTRING, ПОД НАЗВАНИЕМ POST
+public class Pars {
+    public Pars() {
+    }
+
+    public static void main(String[] args) {
+        Pars pars = new Pars();
+        pars.myFirstPast();
+       
+    }
+
+    private void myFirstPast() {
+        try {
+            System.out.println("Подключение к главной странице");
+            List<Post> posts = new ArrayList<>();
+
+            Document document = Jsoup.connect("https://4pda.to/?ref=dtf.ru").get(); //ссылка на сайт
+            //System.out.println("Title: " + document.title());//название сайта
+            //System.out.println(document);//исходный код сайта
+            Elements postTitleElements = document.getElementsByAttributeValue("itemprop", "url");
+
+            /*
+            for (Element postTitleElement: postTitleElements){
+                System.out.println(postTitleElement.attr("title") + " | " + postTitleElement.attr("href"));
+            }
+
+             */
+
+            for (Element postTitleElement : postTitleElements) {
+                String detailsLink = postTitleElement.attr("href"); //ссылка на статью
+                Post post = new Post();
+                post.setDetailsLink(detailsLink);//закидываем на установку эту ссылку
+                post.setTitle(postTitleElement.attr("title")); //на установку название по аттрибуту
+                System.out.println("Подключение к деталям о посте " + detailsLink);
+
+                Document detailsLinkDoc = Jsoup.connect(detailsLink).get();//ссылки на все посты мы получаем, для того чтобы получать, к примеру, имя, дату и т.д.
+
+                try {
+                    Element authorElements = detailsLinkDoc.getElementsByClass("name").first().child(0);
+                    post.setAuthor(authorElements.text());//по первому попавшемуся first() сверху child(0) классу под названием name и получаем text(), устанавливаем author
+                    post.setAuthorDetailsLink(authorElements.attr("href"));
+                    post.setDateOfCreated(detailsLinkDoc.getElementsByClass("date").first().text());//первый эл-нт с тегом name
+
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                    post.setAuthor("Автора нет");
+                    post.setAuthorDetailsLink("Ссылки нет");
+                    post.setDateOfCreated("Даты нет");
+                }
+
+                posts.add(post);
+
+            }
+
+            posts.forEach(System.out::println);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+}
+
+
+
+
+public class Post {
+    private String title;
+    private String detailsLink;
+    private String author;
+    private String authorDetailsLink;
+    private String dateOfCreated;
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDetailsLink(String detailsLink) {
+        this.detailsLink = detailsLink;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public void setAuthorDetailsLink(String authorDetailsLink) {
+        this.authorDetailsLink = authorDetailsLink;
+    }
+
+    public void setDateOfCreated(String dateOfCreated) {
+        this.dateOfCreated = dateOfCreated;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDetailsLink() {
+        return detailsLink;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public String getAuthorDetailsLink() {
+        return authorDetailsLink;
+    }
+
+    public String getDateOfCreated() {
+        return dateOfCreated;
+    }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "title='" + title + '\'' +
+                ", detailsLink='" + detailsLink + '\'' +
+                ", author='" + author + '\'' +
+                ", authorDetailsLink='" + authorDetailsLink + '\'' +
+                ", dateOfCreated='" + dateOfCreated + '\'' +
+                '}';
+    }
+}
