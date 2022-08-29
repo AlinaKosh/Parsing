@@ -1,0 +1,109 @@
+//ПЕРВЫЙ СПОСОБ(МОЙ)
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+public class Pars {
+    public Pars() {
+    }
+
+    public static void main(String[] args) throws IOException {
+        Pars pars = new Pars();
+        pars.menu();
+        
+    }
+    
+    private void menu(){
+        try {
+            System.out.println("Подключение к главной странице");
+            List<Domino> dominos = new ArrayList<>();
+
+            Document main = Jsoup.connect("https://dominodomoy.ru/catalog/").get();
+            Elements dominoMenus = main.getElementsByClass("catalog-section-list-item-title");
+
+            for (Element dominoMenu: dominoMenus){
+
+                System.out.println(dominoMenu.text());
+
+                Document detailsLink = Jsoup.connect("https://dominodomoy.ru" + dominoMenu.attr("href")).get();
+
+                Domino domino = new Domino();
+
+                Elements positions = detailsLink.getElementsByClass("catalog-section-item-background");
+
+                try {
+
+                    for (Element position: positions){
+                        domino.setNameOfPosition(position.getElementsByClass("catalog-section-item-name-wrapper").text());
+                        domino.setPrice(position.getElementsByClass("catalog-section-item-price-discount").text());
+                        domino.setImage(position.select("img").attr("data-original"));
+                    }
+
+                }catch (Exception e){
+                    domino.setNameOfPosition("Названия нет");
+                    domino.setPrice("Цены нет");
+                    domino.setImage("Картинки нет");
+                }
+                dominos.add(domino);
+            }
+            dominos.forEach(System.out::println);
+
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+
+    }
+    }
+    
+    //ДРУГОЙ КЛАСС
+    public class Domino {
+    private String nameOfPosition;
+    private String price;
+    private String image;
+
+    public void setNameOfPosition(String nameOfPosition) {
+        this.nameOfPosition = nameOfPosition;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    @Override
+    public String toString() {
+        return "Domino{" +
+                "Название позиции = '" + nameOfPosition + '\'' +
+                " - цена = '" + price + '\'' +
+                " - ссылка на картинку = '" + image + '\'' +
+                '}';
+    }
+}
+
+
+
+//ДРУГОЕ РЕШЕНИЕ
+private void nMenu() throws IOException {
+        Document main = Jsoup.connect("https://dominodomoy.ru/catalog/").get();
+        Elements categories = main.getElementsByClass("catalog-section-list-item-title");
+        for (Element category : categories) {
+            System.out.println(category.text());
+            Document detailCategory = Jsoup.connect("https://dominodomoy.ru" + category.attr("href")).get();
+            Elements positions = detailCategory.getElementsByClass("catalog-section-item-background");
+            for (Element position : positions) {
+                String name = position.getElementsByClass("catalog-section-item-name-wrapper").text();
+                String price = position.getElementsByClass("catalog-section-item-price-discount").text();
+                String image = position.select("img").attr("data-original");
+                System.out.println("\t" + name + " - " + price + " - https://dominodomoy.ru" + image);
+            }
+        }
+    }
